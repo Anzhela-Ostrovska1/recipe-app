@@ -1,6 +1,6 @@
-# RecipeShare App
+# Family Recipes App
 
-A full-stack recipe sharing web app built with React, Node.js, MongoDB, and Cloudinary.
+A full-stack family recipe sharing app built with React, Node.js, MongoDB, and Cloudinary.
 
 ---
 
@@ -11,6 +11,18 @@ recipe-app/
 ├── frontend/   → React app (deployed to Vercel)
 └── backend/    → Node.js API (deployed to Render)
 ```
+
+---
+
+## Features
+
+- Browse family recipes in a card grid
+- Search recipes live as you type
+- Filter recipes by category (Breakfast, Lunch, Dinner, Desserts, Drinks, Appetizers, Simple Recipes)
+- Submit a recipe with a title, ingredients, instructions, photo, category, and your name
+- Star reviews (1–5) on each recipe — paginated, 5 per page
+- Print a recipe cleanly (navbar and reviews hidden when printing)
+- Admin panel to edit or delete any recipe
 
 ---
 
@@ -99,7 +111,7 @@ The admin panel is at `/admin` on your live site.
 
 - Go to `yoursite.com/admin`
 - Enter the `ADMIN_PASSWORD` you set in the backend `.env`
-- You can now edit or delete any recipe
+- You can edit or delete any recipe, and update its category and author
 
 ---
 
@@ -107,9 +119,9 @@ The admin panel is at `/admin` on your live site.
 
 | Route | Description |
 |---|---|
-| `/` | Browse all recipes |
+| `/` | Browse all recipes with search and category filters |
 | `/submit` | Submit a new recipe |
-| `/recipe/:id` | View a single recipe |
+| `/recipe/:id` | View a recipe, read reviews, and leave a star review |
 | `/admin` | Admin panel (password protected) |
 
 ---
@@ -121,10 +133,12 @@ The admin panel is at `/admin` on your live site.
 | GET | `/api/recipes` | Get all recipes |
 | GET | `/api/recipes/:id` | Get one recipe |
 | POST | `/api/recipes` | Submit a recipe |
+| GET | `/api/feedback/:recipeId` | Get reviews for a recipe |
+| POST | `/api/feedback` | Submit a star review |
 | POST | `/api/admin/login` | Admin login |
-| GET | `/api/admin/recipes` | Admin: get all |
-| PUT | `/api/admin/recipes/:id` | Admin: edit recipe |
-| DELETE | `/api/admin/recipes/:id` | Admin: delete recipe |
+| GET | `/api/admin/recipes` | Admin: get all recipes |
+| PUT | `/api/admin/recipes/:id` | Admin: edit a recipe |
+| DELETE | `/api/admin/recipes/:id` | Admin: delete a recipe |
 
 ---
 
