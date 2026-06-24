@@ -1,6 +1,19 @@
 # Family Recipes App
 
-A full-stack family recipe sharing app built with React, Node.js, MongoDB, and Cloudinary.
+A family recipe sharing app built with React, Vercel Serverless Functions, MongoDB Atlas, and Cloudinary. The entire app — frontend and API — runs as a single project on Vercel. No separate backend server needed.
+
+---
+
+## Features
+
+- Browse family recipes in a card grid
+- Live search as you type
+- Filter by category: Breakfast, Lunch, Dinner, Desserts, Drinks, Appetizers, Simple Recipes
+- Submit a recipe with title, ingredients, instructions, photo, category, and author name
+- Photos upload directly to Cloudinary from the browser
+- Star reviews (1–5) on each recipe, paginated 5 per page
+- Print a recipe cleanly — navbar and reviews are hidden when printing
+- Admin panel to edit or delete any recipe (password protected)
 
 ---
 
@@ -8,21 +21,20 @@ A full-stack family recipe sharing app built with React, Node.js, MongoDB, and C
 
 ```
 recipe-app/
-├── frontend/   → React app (deployed to Vercel)
-└── backend/    → Node.js API (deployed to Render)
+├── api/                     → Vercel serverless functions (Node.js)
+│   ├── _lib/                → Shared helpers (DB, models, Cloudinary, CORS)
+│   ├── recipes/             → GET all / POST new recipe
+│   ├── admin/               → Admin login, GET/PUT/DELETE recipes
+│   ├── feedback/            → GET and POST star reviews
+│   └── upload-signature.js  → Signs Cloudinary uploads
+├── src/                     → React frontend
+│   ├── api/recipes.js       → All API calls
+│   ├── components/          → Navbar, RecipeCard
+│   └── pages/               → Home, Submit, RecipeDetail, Admin
+├── public/                  → Static HTML shell
+├── package.json             → Combined dependencies
+└── vercel.json              → Build config and SPA routing
 ```
-
----
-
-## Features
-
-- Browse family recipes in a card grid
-- Search recipes live as you type
-- Filter recipes by category (Breakfast, Lunch, Dinner, Desserts, Drinks, Appetizers, Simple Recipes)
-- Submit a recipe with a title, ingredients, instructions, photo, category, and your name
-- Star reviews (1–5) on each recipe — paginated, 5 per page
-- Print a recipe cleanly (navbar and reviews hidden when printing)
-- Admin panel to edit or delete any recipe
 
 ---
 
@@ -30,88 +42,93 @@ recipe-app/
 
 1. **MongoDB Atlas** → https://www.mongodb.com/atlas
    - Create a free cluster
-   - Go to Database Access → add a user with a password
-   - Go to Network Access → Allow access from anywhere (0.0.0.0/0)
-   - Go to Clusters → Connect → copy the connection string
+   - Go to **Database Access** → add a user with a password
+   - Go to **Network Access** → click Add IP Address → choose **Allow access from anywhere** (`0.0.0.0/0`)
+   - Go to **Clusters → Connect** → copy the connection string
 
 2. **Cloudinary** → https://cloudinary.com
    - Sign up for free
    - From the dashboard copy: Cloud Name, API Key, API Secret
 
 3. **GitHub** → https://github.com
-   - Create a new repository called `recipe-app`
-   - Push this project to it
+   - Create a repository and push this project to it
 
-4. **Render** → https://render.com (backend hosting)
-
-5. **Vercel** → https://vercel.com (frontend hosting)
+4. **Vercel** → https://vercel.com
+   - Sign up and connect your GitHub account
 
 ---
 
-## Local Development Setup
+## Environment Variables
 
-### Backend
+You need these 5 variables. For local development put them in `.env.local` at the project root. For production set them in the Vercel dashboard.
 
-```bash
-cd backend
-npm install
-cp .env.example .env
-# Fill in your .env values (see below)
-npm run dev
-```
-
-Your `.env` file should look like:
 ```
 MONGODB_URI=mongodb+srv://user:password@cluster0.mongodb.net/recipeapp
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 ADMIN_PASSWORD=choose_a_strong_password
-PORT=5000
 ```
 
-### Frontend
+---
+
+## Local Development
+
+You need the Vercel CLI to run the app locally, because it runs both the React dev server and the serverless API functions together.
 
 ```bash
-cd frontend
+# Install the Vercel CLI (once)
+npm install -g vercel
+
+# Install project dependencies
 npm install
-cp .env.example .env
-# Set REACT_APP_API_URL=http://localhost:5000 for local development
-npm start
+
+# Log in and link the project (once)
+vercel login
+vercel link
+
+# Create your local env file
+cp .env.example .env.local
+# Fill in your real values in .env.local
+
+# Start the local dev server
+vercel dev
 ```
+
+The app runs at `http://localhost:3000`.
+
+> Do not use `npm start` — it only starts the React UI and the API calls will fail.
 
 ---
 
 ## Deployment
 
-### Step 1 — Deploy Backend to Render
+### Step 1 — Push to GitHub
 
-1. Go to https://render.com → New → Web Service
-2. Connect your GitHub repo
-3. Set Root Directory to `backend`
-4. Build command: `npm install`
-5. Start command: `node server.js`
-6. Add all your environment variables from `.env`
-7. Click Deploy — copy the URL (e.g. `https://recipe-app-xyz.onrender.com`)
+```bash
+git add .
+git commit -m "initial deploy"
+git push
+```
 
-### Step 2 — Deploy Frontend to Vercel
+### Step 2 — Deploy on Vercel
 
-1. Go to https://vercel.com → New Project
-2. Connect your GitHub repo
-3. Set Root Directory to `frontend`
-4. Add environment variable:
-   `REACT_APP_API_URL` = the Render URL from Step 1
-5. Click Deploy
+1. Go to https://vercel.com → **New Project**
+2. Import your GitHub repository
+3. Leave the root directory as `.` (the project root)
+4. Go to **Environment Variables** and add all 5 variables listed above
+5. Click **Deploy**
+
+Vercel automatically runs `npm run build` and serves the app. Future deploys happen automatically on every `git push`.
 
 ---
 
 ## Admin Panel
 
-The admin panel is at `/admin` on your live site.
+Go to `/admin` on your live site (e.g. `yoursite.vercel.app/admin`).
 
-- Go to `yoursite.com/admin`
-- Enter the `ADMIN_PASSWORD` you set in the backend `.env`
-- You can edit or delete any recipe, and update its category and author
+- Enter the `ADMIN_PASSWORD` you set in your environment variables
+- Edit or delete any recipe, including its category and author
 
 ---
 
@@ -119,7 +136,7 @@ The admin panel is at `/admin` on your live site.
 
 | Route | Description |
 |---|---|
-| `/` | Browse all recipes with search and category filters |
+| `/` | Browse all recipes with live search and category filters |
 | `/submit` | Submit a new recipe |
 | `/recipe/:id` | View a recipe, read reviews, and leave a star review |
 | `/admin` | Admin panel (password protected) |
@@ -132,11 +149,12 @@ The admin panel is at `/admin` on your live site.
 |---|---|---|
 | GET | `/api/recipes` | Get all recipes |
 | GET | `/api/recipes/:id` | Get one recipe |
-| POST | `/api/recipes` | Submit a recipe |
+| POST | `/api/recipes` | Create a recipe (JSON body) |
 | GET | `/api/feedback/:recipeId` | Get reviews for a recipe |
 | POST | `/api/feedback` | Submit a star review |
-| POST | `/api/admin/login` | Admin login |
-| GET | `/api/admin/recipes` | Admin: get all recipes |
+| POST | `/api/upload-signature` | Get a signed Cloudinary upload token |
+| POST | `/api/admin/login` | Verify admin password |
+| GET | `/api/admin/recipes` | Admin: list all recipes |
 | PUT | `/api/admin/recipes/:id` | Admin: edit a recipe |
 | DELETE | `/api/admin/recipes/:id` | Admin: delete a recipe |
 
@@ -144,8 +162,10 @@ The admin panel is at `/admin` on your live site.
 
 ## Making Changes After Deployment
 
-Any change follows this process:
-1. Edit the code on your computer
-2. `git add . && git commit -m "describe your change"`
-3. `git push`
-4. Vercel and Render auto-deploy within ~1 minute
+```bash
+# Edit files, then:
+git add .
+git commit -m "describe your change"
+git push
+# Vercel redeploys automatically within ~1 minute
+```
