@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { submitRecipe } from "../api/recipes";
+import { submitRecipe, uploadPhoto } from "../api/recipes";
 import "./Submit.css";
 
 export default function Submit() {
@@ -29,15 +29,21 @@ export default function Submit() {
     setLoading(true);
 
     try {
-      const data = new FormData();
-      data.append("title", form.title);
-      data.append("ingredients", form.ingredients);
-      data.append("instructions", form.instructions);
-      data.append("category", form.category);
-      data.append("author", form.author);
-      if (photo) data.append("photo", photo);
+      let photoUrl = null;
+      let photoPublicId = null;
+      if (photo) {
+        ({ photoUrl, photoPublicId } = await uploadPhoto(photo));
+      }
 
-      const recipe = await submitRecipe(data);
+      const recipe = await submitRecipe({
+        title: form.title,
+        ingredients: form.ingredients,
+        instructions: form.instructions,
+        category: form.category,
+        author: form.author,
+        photoUrl,
+        photoPublicId,
+      });
       navigate(`/recipe/${recipe._id}`);
     } catch {
       setError("Something went wrong. Please try again.");

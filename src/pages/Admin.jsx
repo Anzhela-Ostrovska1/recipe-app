@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { adminLogin, adminGetRecipes, adminDeleteRecipe, adminUpdateRecipe } from "../api/recipes";
+import { adminLogin, adminGetRecipes, adminDeleteRecipe, adminUpdateRecipe, uploadPhoto } from "../api/recipes";
 import "./Admin.css";
 
 export default function Admin() {
@@ -47,15 +47,20 @@ export default function Admin() {
 
   const handleEditSave = async (id) => {
     try {
-      const data = new FormData();
-      data.append("title", editForm.title);
-      data.append("ingredients", editForm.ingredients);
-      data.append("instructions", editForm.instructions);
-      data.append("category", editForm.category);
-      data.append("author", editForm.author);
-      if (editPhoto) data.append("photo", editPhoto);
+      const body = {
+        title: editForm.title,
+        ingredients: editForm.ingredients,
+        instructions: editForm.instructions,
+        category: editForm.category,
+        author: editForm.author,
+      };
+      if (editPhoto) {
+        const { photoUrl, photoPublicId } = await uploadPhoto(editPhoto);
+        body.photoUrl = photoUrl;
+        body.photoPublicId = photoPublicId;
+      }
 
-      const updated = await adminUpdateRecipe(id, data, password);
+      const updated = await adminUpdateRecipe(id, body, password);
       setRecipes((r) => r.map((x) => (x._id === id ? updated : x)));
       setEditing(null);
       notify("Recipe updated.");
